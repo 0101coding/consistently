@@ -1,5 +1,13 @@
 {
   "name": "hardhat-project",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "clean": "npx hardhat clean",
+    "deploy:local": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:rinkeby": "npx hardhat run scripts/deploy.js --network rinkeby",
+    "frontend": "cd frontend/ && npm run start",
+    "node": "npx hardhat node"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",

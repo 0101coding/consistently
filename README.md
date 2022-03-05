@@ -1,7 +1,13 @@
 # Simple hardhat react daap(javascript)
-1. add variables to `.env` as in `.env.example`
-2. npx hardhat node
-3. npx hardhat run scripts/deploy.js --network localhost
+## Development setup
+
+1. Clone this repo
+2. `cd cloned-folder` && `npm install`
+3. `cd frontend` && `npm install`
+4. add variables to `.env` as in `.env.example`
+5. `npm run node`
+6. `npm run deploy:local` || `npm run deploy:rinkeby`
+7. `npm run frontend`
 
 # Advanced Sample Hardhat Project
 

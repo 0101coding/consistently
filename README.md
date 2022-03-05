@@ -1,4 +1,10 @@
+# Simple hardhat react daap(javascript)
+1. add variables to `.env` as in `.env.example`
+2. npx hardhat node
+3. npx hardhat run scripts/deploy.js --network localhost
+
 # Advanced Sample Hardhat Project
+
 
 This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
 

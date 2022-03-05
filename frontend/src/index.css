@@ -32,3 +32,7 @@ a {
   max-width: 800px;
   text-align: center;
 }
+
+.mt-2 {
+  margin-top: 2rem;
+}

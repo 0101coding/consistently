@@ -1,5 +1,7 @@
 import Footer from "./components/Footer";
+import Greeter from "./components/Greeter";
 import Navbar from "./components/Navbar";
+import { GreeterProvider } from "./context/GreeterContext";
 import { WalletProvider } from "./context/WalletContext";
 
 function App() {
@@ -9,7 +11,9 @@ function App() {
         <div className="container">
           <Navbar />
           <div>
-            <h1>Home Page</h1>
+            <GreeterProvider>
+              <Greeter />
+            </GreeterProvider>
           </div>
           <Footer />
         </div>

@@ -1,5 +1,5 @@
 import Footer from "./components/Footer";
-import Header from "./components/Header";
+import Navbar from "./components/Navbar";
 import { WalletProvider } from "./context/WalletContext";
 
 function App() {
@@ -7,7 +7,7 @@ function App() {
     <div className="main">
       <WalletProvider>
         <div className="container">
-          <Header />
+          <Navbar />
           <div>
             <h1>Home Page</h1>
           </div>

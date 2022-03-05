@@ -1,5 +1,5 @@
 import React from "react";
-import { getProvider } from "../provider";
+import { getProvider, getSignerAddress } from "../provider";
 
 const WalletContext = React.createContext({});
 
@@ -10,6 +10,11 @@ export const WalletProvider = ({ children }) => {
     async function init() {
       const _provider = await getProvider();
       setProvider(_provider);
+      console.log(_provider);
+      const _walletAddress = await getSignerAddress();
+      if (_walletAddress) {
+        setWalletAddress(_walletAddress);
+      }
     }
     init();
   }, []);

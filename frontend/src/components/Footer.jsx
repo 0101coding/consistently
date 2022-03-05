@@ -12,7 +12,7 @@ export default function Footer() {
       <br />
       <a
         className={styles.link}
-        href="https://github.com/chiranz/ecdsa_wallet"
+        href="https://github.com/chiranz/simple-react-daap-boilerplate"
         target="_blank"
         rel="noopener noreferrer"
       >

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 require("dotenv").config();
 
 require("@nomiclabs/hardhat-etherscan");
@@ -23,6 +24,9 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: "0.8.4",
+  path: {
+    artifacts: "./frontend/artifacts",
+  },
   networks: {
     rinkeby: {
       url: process.env.RINKEBY_URL || "",

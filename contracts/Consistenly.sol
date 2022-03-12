@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: GPL-3.0
+//SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.0; 
 
-pragma solidity >=0.7.0 <0.9.0;
-
+import "./Habit.sol";
 contract Consistently {
  
-
+    Habit internal habit = new Habit();
     mapping(address => bool) public userAddresses;
     address public owner;
     uint256 public timestarts;
@@ -73,8 +73,8 @@ contract Consistently {
         } 
 
         
-        //TODO: Transfer the Token to the User Address
-
+        //DONE: Mint the Token to the User Address
+        habit.mint(msg.sender, 1);
         checkInCount[msg.sender]++;
         lastCheckIn[msg.sender] = currentTime;
         nextCheckIn[msg.sender] = currentTime * 86400; // Next CheckIn Time is in 24 Hours
@@ -99,15 +99,28 @@ contract Consistently {
     }
 
 
-
-
     //TODO: Find a way to penalize the user if they do not checkin for a number of days
     // Set the User's Last Checkin Time and User's Next Check In
     // Emit an event and notify the User that He is penalized.
+    // Run this every 3 days
+    function autoPenalize() internal {
+        uint currentTime = block.timestamp;
+        for(uint i =0; i < intentions.length; i++){
+             if (currentTime > (nextCheckIn[intentions[i].userAddress] + (86400 * 3))) { // Has not checked in 3 days
+                intentions[i].weiBalance = intentions[i].weiDeposited / 4;
+                intentions[i].defaulted++;
+                if (intentions[i].defaulted == 4){
+                    intentions[i].active == false;
+                    userIntentions[intentions[i].userAddress] = 0; // reset the userIntention
+                }
+            }
+        }
+    }
 
 
     //TODO Have a function to deposit the contract balance into AAVE when it is more than 1 ETH
     // This function can be run by Chain link keeper
+     
 
     //TODO Have a redeem function to allow the User redeem Eth balance in the Contract.
     // Must not be able to redeem unless quest is completed
@@ -115,6 +128,15 @@ contract Consistently {
     // Mint an NFT to the User
 
     //TODO: Have a external view function to return the user balance, Deposited Wei, Days Remaining, Habit
+    function getUserIntention() external view 
+        onlyRegisteredUsers(msg.sender)
+        onlyActiveUsers(msg.sender)
+     returns (Intention memory){
+         uint intentionId = userIntentions[msg.sender] - 1;
+        Intention memory intention = intentions[intentionId];
+        return intention;
+
+    }
 
     modifier onlyRegisteredUsers(address _userAddress) {
         require(userAddresses[_userAddress]);

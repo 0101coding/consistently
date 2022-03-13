@@ -11,6 +11,10 @@ contract Habit is ERC20, Ownable {
     function mint(address account, uint256 amount)  public onlyOwner virtual {
         super._mint(account, amount);
     }
+
+    function burn(address account, uint256 amount)  public onlyOwner virtual {
+        super._burn(account, amount);
+    }
  
 
 }

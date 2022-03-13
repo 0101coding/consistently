@@ -2,9 +2,13 @@
 pragma solidity ^0.8.0; 
 
 import "./Habit.sol";
+import "./HabitNFT.sol";
+import "./aave/IPool.sol";
 contract Consistently {
- 
-    Habit internal habit = new Habit();
+    IPool public aavePool; // 0xe91E690407977F0b9fDc655504b895Fe4af0C371
+
+    Habit public habit = new Habit();
+    HabitNFT public habitNFT = new HabitNFT();
     mapping(address => bool) public userAddresses;
     address public owner;
     uint256 public timestarts;
@@ -21,9 +25,10 @@ contract Consistently {
         
     }
     Intention[] public intentions;
-    constructor() {
+    constructor(address _aavePoolAddress) {
         owner = msg.sender;
-        //TODO: Mint all the Habit Tokens
+        aavePool = IPool(_aavePoolAddress);
+        // Set the baseURI of the Habit NFT
     }
 
 
@@ -51,8 +56,9 @@ contract Consistently {
         // Register the User intention
         userIntentions[msg.sender] = intentionId;
         // Set His last Checkin
+        checkInCount[msg.sender] = 0;
         lastCheckIn[msg.sender] = currentTime;
-        nextCheckIn[msg.sender] = currentTime * 86400; // Next CheckIn Time is in 24 Hours
+        nextCheckIn[msg.sender] = currentTime + 86400; // Next CheckIn Time is in 24 Hours
 
         emit IntentionRegistered(msg.sender, msg.value, _habit, currentTime, true );
     }
@@ -64,68 +70,109 @@ contract Consistently {
         {
         // confirm check in within the current epoch
         uint256 currentTime = block.timestamp;
-        require(currentTime > nextCheckIn[msg.sender]); // Cannot Check In within a 24 Hour Period
+        require(currentTime > nextCheckIn[msg.sender], "You cannot checkin within 24 Hours"); // Cannot Check In within a 24 Hour Period
+        
+
         
         // This should not be a require. We should still allow the user to checkin after 24hrs have elapsed. 
         //Only that the User needs to be penalized
-        if(currentTime < nextCheckIn[msg.sender] * 86400){// Must Check In 24 Hours
+        if(currentTime > nextCheckIn[msg.sender] + 86400){// Must Check In 24 Hours
             penalizeUserForLateCheckIn(msg.sender);
         } 
 
         
         //DONE: Mint the Token to the User Address
         habit.mint(msg.sender, 1);
-        checkInCount[msg.sender]++;
+
+        checkInCount[msg.sender] = checkInCount[msg.sender] + 1; // We increate the user Checkin only when they checkin themselves
         lastCheckIn[msg.sender] = currentTime;
-        nextCheckIn[msg.sender] = currentTime * 86400; // Next CheckIn Time is in 24 Hours
+        nextCheckIn[msg.sender] = currentTime + 86400; // Next CheckIn Time is in 24 Hours
         emit CheckedIn(msg.sender, currentTime);
     }
 
 
     function penalizeUserForLateCheckIn(address _userAddress) private {
-        require(userIntentions[_userAddress] > 0);
+        require(userIntentions[_userAddress] > 0, "User has no Registered Intention");
 
         uint intentionId = userIntentions[_userAddress] - 1;
         Intention storage intention = intentions[intentionId];
-        // This line is buggy
-        intention.weiBalance = intention.weiDeposited / 4;
+        // Reduce his Wei Balance by 25%
+        intention.weiBalance = intention.weiBalance - (intention.weiDeposited / 4);
         // increment the defaulted
         intention.defaulted++;
         if (intention.defaulted == 4){
-            intention.active == false;
+            intention.active = false;
             userIntentions[_userAddress] = 0; // reset the userIntention
             //?? Should we set the userAddresses Mapping to false for this user?
         }
     }
 
 
-    //TODO: Find a way to penalize the user if they do not checkin for a number of days
-    // Set the User's Last Checkin Time and User's Next Check In
-    // Emit an event and notify the User that He is penalized.
-    // Run this every 3 days
+    /** @dev Find a way to penalize the user if they do not checkin for 3 days
+     Set the User's Last Checkin Time and User's Next Check In
+     Emit an event and notify the User that He is penalized.
+     Run this every 3 days
+    */
     function autoPenalize() internal {
         uint currentTime = block.timestamp;
         for(uint i =0; i < intentions.length; i++){
-             if (currentTime > (nextCheckIn[intentions[i].userAddress] + (86400 * 3))) { // Has not checked in 3 days
-                intentions[i].weiBalance = intentions[i].weiDeposited / 4;
-                intentions[i].defaulted++;
-                if (intentions[i].defaulted == 4){
-                    intentions[i].active == false;
-                    userIntentions[intentions[i].userAddress] = 0; // reset the userIntention
+            //Only fire if the User ia Active
+            if (intentions[i].active == true){
+                if (currentTime > (nextCheckIn[intentions[i].userAddress] + (86400 * 3))) { // Has not checked in 3 days
+                    intentions[i].weiBalance = intentions[i].weiDeposited / 4;
+                    intentions[i].defaulted++;
+
+                    // Set his last CheckIn Time
+                    lastCheckIn[msg.sender] = currentTime;
+                    // Set his next Checkin Time - To avoid repanilzation
+                    nextCheckIn[intentions[i].userAddress] = currentTime  + 86400; // 
+                    if (intentions[i].defaulted == 4){
+                        intentions[i].active = false;
+                        userIntentions[intentions[i].userAddress] = 0; // reset the userIntention
+                    }
                 }
             }
         }
     }
 
 
-    //TODO Have a function to deposit the contract balance into AAVE when it is more than 1 ETH
-    // This function can be run by Chain link keeper
-     
+    /** @dev A function to deposit the contract balance into AAVE when it is more than 1 ETH
+     This function can be run by Chain link keeper
+     This function deposits the contract balance into AAVE 
+    */
+    function depositIntoAave() public {
+        if (address(this).balance > 2 ether){
+            aavePool.deposit
+                (0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, address(this).balance, address(this), 0);
+        }
+    }
 
-    //TODO Have a redeem function to allow the User redeem Eth balance in the Contract.
-    // Must not be able to redeem unless quest is completed
-    // Must burn the habit token once redeemed
-    // Mint an NFT to the User
+    /** @dev A  function to allow the User redeem their Eth balance in the Contract.
+        Must not be able to redeem unless quest is completed
+        Must burn the habit token once redeemed
+        Mint an NFT to the User 
+    */
+    function redeem()
+        onlyRegisteredUsers(msg.sender)
+        onlyActiveUsers(msg.sender)
+        onlyCompletedQuests(msg.sender)
+     external {
+         // Get the User's Index
+        uint intentionId = userIntentions[msg.sender] - 1; // Retrieve the user from the Intentions Array without the need to loop
+        Intention storage intention = intentions[intentionId];
+        // Set the User to Inactive
+        intention.active = false; 
+        //Reset the Checkin Count
+        checkInCount[msg.sender] = 0;
+
+        // Burn the Users habit Token
+        habit.burn(msg.sender, habit.balanceOf(msg.sender));
+        // Refund the User's Deposit from the Aave Pool
+        aavePool.withdraw(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, intention.weiBalance, msg.sender);
+        // Mint a NFT to the User's Wallet
+        habitNFT.awardItem(msg.sender);
+
+    }
 
     //TODO: Have a external view function to return the user balance, Deposited Wei, Days Remaining, Habit
     function getUserIntention() external view 
@@ -138,18 +185,33 @@ contract Consistently {
 
     }
 
+
+
     modifier onlyRegisteredUsers(address _userAddress) {
-        require(userAddresses[_userAddress]);
+        require(userAddresses[_userAddress], "Only Registed Users Allowed");
         _;
     }
     
     modifier onlyActiveUsers(address _userAddress){
-        require(isUserIntentionActive(_userAddress));
+        require(isUserIntentionActive(_userAddress), "Only active users Allowed");
         _;
     }
 
+    modifier onlyActiveQuests(address _userAddress){
+        require(hasCompletedQuest(_userAddress) == false, "Quest is no more active");
+        _;
+    }
+
+    modifier onlyCompletedQuests(address _userAddress){
+        require(hasCompletedQuest(_userAddress), "Quest has been completed");
+        _;
+    }
+
+    /**
+        This helper function helps to confirm if the user is active. It is used in the modifier above
+    */
     function isUserIntentionActive(address _userAddress) private view returns (bool) {
-        require(userIntentions[_userAddress] > 0);
+        require(userIntentions[_userAddress] > 0, "User Intention is not active");
 
         uint intentionId = userIntentions[_userAddress] - 1;
         Intention memory intention = intentions[intentionId];
@@ -157,5 +219,15 @@ contract Consistently {
         return intention.active;
     }
 
+
+    /**
+    This helper function checks if the User has completed the Quest. The proof we have that the user has completed the quest is
+    that the user's habit token matches the number of days he planned to commit for.
+     */
+    function hasCompletedQuest(address _userAddress) private view returns (bool) {
+        uint intentionId = userIntentions[_userAddress] - 1; // Retrieve the user from the Intentions Array without the need to loop
+        Intention memory intention = intentions[intentionId];
+        return (checkInCount[_userAddress] == intention.noOfDays);
+    }
 
 }

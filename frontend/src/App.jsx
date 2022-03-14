@@ -4,6 +4,10 @@ import Navbar from "./components/Navbar";
 import { GreeterProvider } from "./context/GreeterContext";
 import { WalletProvider } from "./context/WalletContext";
 
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+
 function App() {
   return (
     <div className="main">

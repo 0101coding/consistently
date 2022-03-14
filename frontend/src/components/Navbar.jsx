@@ -18,17 +18,21 @@ export default function Navbar() {
     }
   };
 
-  return (
-    <nav className={styles.navbar}>
-      <div className={styles.brand}>DaapBoi</div>
-      <div className="nav-links">
-        <span>{}</span>
-        {walletAddress ? (
-          <span>{getTruncatedAddress(walletAddress)}</span>
-        ) : (
-          <Button onClick={handleConnect}>Connect</Button>
-        )}
-      </div>
-    </nav>
+  return ( 
+    <nav className="navbar navbar-light bg-light">
+            <div className="container-fluid">
+                Consistently
+                <a className="navbar-brand" href="#"> Can you do it?</a>
+                <div className="d-flex">
+                  <span>{}</span>
+                  {walletAddress ? (
+                    <span>{getTruncatedAddress(walletAddress)}</span>
+                  ) : (
+                    <Button onClick={handleConnect}>Connect</Button>
+                  )}
+                </div>
+            </div>
+
+        </nav>
   );
 }

@@ -5,14 +5,16 @@ import "./Habit.sol";
 import "./HabitNFT.sol";
 import "./aave/IPool.sol";
 contract Consistently {
-    IPool public aavePool; // 0xe91E690407977F0b9fDc655504b895Fe4af0C371
+    IPool public aavePool;
 
     Habit public habit = new Habit();
     HabitNFT public habitNFT = new HabitNFT();
     mapping(address => bool) public userAddresses;
     address public owner;
-    uint256 public timestarts;
-    
+     
+    uint8 minimumDays  = 21;
+    uint8 maxiumDays = 255;
+    uint8 timeLapse = 86400; // Currently set at one day
     struct Intention {
         uint8 noOfDays;
         uint8 defaulted; // Only 4 defaults are permitted
@@ -25,9 +27,9 @@ contract Consistently {
         
     }
     Intention[] public intentions;
-    constructor(address _aavePoolAddress) {
+    constructor() {
         owner = msg.sender;
-        aavePool = IPool(_aavePoolAddress);
+        aavePool = IPool("0xe91E690407977F0b9fDc655504b895Fe4af0C371");
         // Set the baseURI of the Habit NFT
     }
 
@@ -41,9 +43,12 @@ contract Consistently {
     event IntentionRegistered(address userAddress, uint256 weiDeposited, string habit, uint256 timeRegistered, bool active);
     event CheckedIn(address userAddress, uint256 lastCheckInTime);
     // Allow the user to register what habit they are trying to form or break
+
+    
     function register(string memory _habit, uint8 _days) external payable {
-        require(_days >= 21, "Minimum of 21 days Acceptable");
-        require(_days <= 255, "Maximum of 255 days Acceptable");
+        require(msg.value >= .01 ether, "Minimum Amount of .1 Eth Required");
+        require(_days >= minimumDays, "Minimum of 21 days Acceptable");
+        require(_days <= maxiumDays, "Maximum of 255 days Acceptable");
         uint256 currentTime = block.timestamp;
         
         Intention memory intent = Intention(_days, 0, currentTime, msg.value, msg.value, _habit, msg.sender, true);
@@ -58,7 +63,7 @@ contract Consistently {
         // Set His last Checkin
         checkInCount[msg.sender] = 0;
         lastCheckIn[msg.sender] = currentTime;
-        nextCheckIn[msg.sender] = currentTime + 86400; // Next CheckIn Time is in 24 Hours
+        nextCheckIn[msg.sender] = currentTime + timeLapse; // Next CheckIn Time is in 24 Hours
 
         emit IntentionRegistered(msg.sender, msg.value, _habit, currentTime, true );
     }
@@ -76,7 +81,7 @@ contract Consistently {
         
         // This should not be a require. We should still allow the user to checkin after 24hrs have elapsed. 
         //Only that the User needs to be penalized
-        if(currentTime > nextCheckIn[msg.sender] + 86400){// Must Check In 24 Hours
+        if(currentTime > nextCheckIn[msg.sender] + timeLapse){// Must Check In 24 Hours
             penalizeUserForLateCheckIn(msg.sender);
         } 
 
@@ -86,7 +91,7 @@ contract Consistently {
 
         checkInCount[msg.sender] = checkInCount[msg.sender] + 1; // We increate the user Checkin only when they checkin themselves
         lastCheckIn[msg.sender] = currentTime;
-        nextCheckIn[msg.sender] = currentTime + 86400; // Next CheckIn Time is in 24 Hours
+        nextCheckIn[msg.sender] = currentTime + timeLapse; // Next CheckIn Time is in 24 Hours
         emit CheckedIn(msg.sender, currentTime);
     }
 
@@ -175,7 +180,7 @@ contract Consistently {
 
     }
 
-    //TODO: Have a external view function to return the user balance, Deposited Wei, Days Remaining, Habit
+    //DONE: Have a external view function to return the user balance, Deposited Wei, Days Remaining, Habit
     function getUserIntention() external view 
         onlyRegisteredUsers(msg.sender)
         onlyActiveUsers(msg.sender)

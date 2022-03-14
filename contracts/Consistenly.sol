@@ -80,7 +80,7 @@ contract Consistently {
             penalizeUserForLateCheckIn(msg.sender);
         } 
 
-        
+         
         //DONE: Mint the Token to the User Address
         habit.mint(msg.sender, 1);
 
@@ -153,10 +153,11 @@ contract Consistently {
         Mint an NFT to the User 
     */
     function redeem()
+        external
         onlyRegisteredUsers(msg.sender)
         onlyActiveUsers(msg.sender)
         onlyCompletedQuests(msg.sender)
-     external {
+      {
          // Get the User's Index
         uint intentionId = userIntentions[msg.sender] - 1; // Retrieve the user from the Intentions Array without the need to loop
         Intention storage intention = intentions[intentionId];
@@ -168,7 +169,7 @@ contract Consistently {
         // Burn the Users habit Token
         habit.burn(msg.sender, habit.balanceOf(msg.sender));
         // Refund the User's Deposit from the Aave Pool
-        aavePool.withdraw(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, intention.weiBalance, msg.sender);
+       // aavePool.withdraw(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, intention.weiBalance, msg.sender);
         // Mint a NFT to the User's Wallet
         habitNFT.awardItem(msg.sender);
 

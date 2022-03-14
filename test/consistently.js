@@ -27,7 +27,7 @@ const passTime = (timeInDays) => {
   });
  
 
-xdescribe("Consistently Registration", function () { 
+describe("Consistently Registration", function () { 
   before(async () => {
      // The user vows to promise to quit smoking and vows 1 ether
       await contract.connect(signer0).register("I am ready to quit smoking", 21, {
@@ -153,15 +153,21 @@ xdescribe("Consistently Registration", function () {
 describe("Consistently Checkin", function () {
   before(async () => {
      // The user vows to promise to quit smoking and vows 1 ether
-      await contract.connect(signer0).register("I am ready to quit smoking", 21, {
+     await contract.connect(signer0).register("Spend Less Time on Discord", 48, {
         value: ethers.utils.parseEther("1")
       });
+      await contract.connect(signer1).register("I am ready to start reading", 21, {
+        value: ethers.utils.parseEther("1")
+      });
+  })
+  it("Should not allow the user to the user to redeem when quest is not completed", async () => {
+    await expect(contract.connect(signer1).redeem()).to.be.reverted;
   })
   it("Should allow a user Checkin Within within Days for the specified number of days", async function () {
       
     for(let i=1; i <=21; i++){
       await passTime(oneDay * 1 + 400);
-      await contract.connect(signer0).checkin();
+      await contract.connect(signer1).checkin();
        
       //set the current BlockTimeStamp
       let blockNum = await ethers.provider.getBlockNumber();
@@ -170,17 +176,47 @@ describe("Consistently Checkin", function () {
 
      
       // Last Check In should be now
-      let checkInTime = await contract.callStatic.lastCheckIn(signer0Address);
+      let checkInTime = await contract.callStatic.lastCheckIn(signer1Address);
       assert.equal(checkInTime, timestamp);
     }
 
-    let checkInCount = await contract.callStatic.checkInCount(signer0Address);
+    let checkInCount = await contract.callStatic.checkInCount(signer1Address);
     assert.equal(checkInCount, 21);
 
   })
 
+  it("Should have the number of habit token match the number of days checked in", async () => {
+    let habitAddress = await contract.habit();
+
+    let habit = await ethers.getContractAt("IERC20", habitAddress);
+    const balance = await habit.balanceOf(signer1Address);
+    console.log("Token Balance ", balance);
+    assert.equal(balance, "21");
+  })
+
   it("should allow the user to redeem after the number of days have elapsed", async () =>{
-    
+    await expect(contract.connect(signer1).redeem()).to.be.not.reverted 
+  })
+  it("should burn the habit token in the user's wallet", async() => {
+    let habitAddress = await contract.habit();
+
+    let habit = await ethers.getContractAt("IERC20", habitAddress);
+    const balance = await habit.balanceOf(signer1Address);
+    assert.equal(balance, "0");
+  })
+  it("should mint an NFT to the User's Wallet", async() => {
+    let habitNFTAddress = await contract.habitNFT();
+
+    let habitNFT = await ethers.getContractAt("IERC721", habitNFTAddress);
+    const balance = await habitNFT.balanceOf(signer1Address);
+    assert.equal(balance, "1");
+  })
+  it("should allow a user to retrieve Intention", async () => {
+      let intention = await contract.connect(signer0).callStatic.getUserIntention();
+      assert.equal(intention.active, true)
+      assert.equal(intention.noOfDays, 48);
+      assert.equal(intention.habit, "Spend Less Time on Discord")
+      assert.equal(intention.userAddress, signer0Address);
   })
 })
  

@@ -16,7 +16,7 @@ async function main() {
 
   // We get the contract to deploy
   const Consistenly = await hre.ethers.getContractFactory("Consistently");
-  const contract = await Consistenly.deploy("Hello, Hardhat!");
+  const contract = await Consistenly.deploy();
 
   await contract.deployed();
 

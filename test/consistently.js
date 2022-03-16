@@ -17,7 +17,7 @@ const passTime = (timeInDays) => {
 
  before(async () => {
       Consistently = await ethers.getContractFactory("Consistently");
-      contract = await Consistently.deploy(aavePoolAddress);
+      contract = await Consistently.deploy();
       await contract.deployed();
       signer0 = await ethers.provider.getSigner(0);
       signer0Address = await signer0.getAddress();
@@ -79,7 +79,7 @@ describe("Consistently Registration", function () {
 
         let habit = await ethers.getContractAt("IERC20", habitAddress);
         const balance = await habit.balanceOf(signer0Address);
-        assert.equal(balance, "1");
+        assert.equal(balance, "1000000000000000000");
 
       } )
       it("should increase the User Checkin Count by one", async() =>{
@@ -191,7 +191,7 @@ describe("Consistently Checkin", function () {
     let habit = await ethers.getContractAt("IERC20", habitAddress);
     const balance = await habit.balanceOf(signer1Address);
     console.log("Token Balance ", balance);
-    assert.equal(balance, "21");
+    assert.equal(balance, "21000000000000000000");
   })
 
   it("should allow the user to redeem after the number of days have elapsed", async () =>{

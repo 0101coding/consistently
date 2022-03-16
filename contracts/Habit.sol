@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 contract Habit is ERC20, Ownable {
-    constructor() ERC20("Habit", "HBT"){
+    constructor() ERC20("Habitv2", "HBT"){
         
     }
 

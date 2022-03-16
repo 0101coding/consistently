@@ -12,9 +12,9 @@ contract Consistently {
     mapping(address => bool) public userAddresses;
     address public owner;
      
-    uint8 minimumDays  = 21;
+    uint8 minimumDays  = 3;
     uint8 maxiumDays = 255;
-    uint timeLapse = 86400; // Currently set at one day
+    uint timeLapse = 600; // Currently set at one day
     struct Intention {
         uint8 noOfDays;
         uint8 defaulted; // Only 4 defaults are permitted
@@ -49,6 +49,8 @@ contract Consistently {
         require(msg.value >= .01 ether, "Minimum Amount of .1 Eth Required");
         require(_days >= minimumDays, "Minimum of 21 days Acceptable");
         require(_days <= maxiumDays, "Maximum of 255 days Acceptable");
+        require(userIntentions[msg.sender]==0, "You can only have one habit tracked at a time");
+
         uint256 currentTime = block.timestamp;
         
         Intention memory intent = Intention(_days, 0, currentTime, msg.value, msg.value, _habit, msg.sender, true);
@@ -87,7 +89,7 @@ contract Consistently {
 
          
         //DONE: Mint the Token to the User Address
-        habit.mint(msg.sender, 1);
+        habit.mint(msg.sender, 1 ether);
 
         checkInCount[msg.sender] = checkInCount[msg.sender] + 1; // We increate the user Checkin only when they checkin themselves
         lastCheckIn[msg.sender] = currentTime;
@@ -166,6 +168,7 @@ contract Consistently {
          // Get the User's Index
         uint intentionId = userIntentions[msg.sender] - 1; // Retrieve the user from the Intentions Array without the need to loop
         Intention storage intention = intentions[intentionId];
+        userIntentions[msg.sender]=0;
         // Set the User to Inactive
         intention.active = false; 
         //Reset the Checkin Count
@@ -234,6 +237,11 @@ contract Consistently {
         uint intentionId = userIntentions[_userAddress] - 1; // Retrieve the user from the Intentions Array without the need to loop
         Intention memory intention = intentions[intentionId];
         return (checkInCount[_userAddress] == intention.noOfDays);
+    }
+
+    function withdraw() external payable {
+        require(msg.sender==owner, "only owner can withdraw funds");
+        payable(owner).transfer(address(this).balance);
     }
 
 }

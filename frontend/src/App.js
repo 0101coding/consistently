@@ -10,7 +10,7 @@ import { networks } from './utils/networks';
 // Constants
 const TWITTER_HANDLE = 'home';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const CONTRACT_ADDRESS = '0x5d1eA96ec5539Be86Cb3C5e9bcb753b768845bd1';
+const CONTRACT_ADDRESS = '0xB5Ce8A134EC1f7725A72232Aac35E8236201Aae3';
 
 const App = () => {
 	const [currentAccount, setCurrentAccount] = useState('');
@@ -217,6 +217,9 @@ const App = () => {
 				console.log("BOOL:", check);
 				setChecking(check);
 
+				let habitAddress = await contract.habit();
+				console.log("Token address:",habitAddress);
+
 				console.log("The users intentions:")
 				intention = await contract.getUserIntention();
 				setNumberOfDays(intention[0]);
@@ -226,6 +229,34 @@ const App = () => {
 				setHabit1(intention[5]);
 				console.log(intention)
 				// Wait for the transaction to be mined
+			}
+		}
+		catch (error) {
+			console.log(error);
+		}
+	}
+
+	//function to call withdraw:
+	//function to call getuserintention
+	const withdrawFunder = async () => {
+		try {
+			const { ethereum } = window;
+			if (ethereum) {
+
+				const provider = new ethers.providers.Web3Provider(ethereum);
+				const signer = provider.getSigner();
+				const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+				let tx = await contract.withdraw();
+				const receipt = await tx.wait();
+
+				// Check if the transaction was successfully completed
+				if (receipt.status === 1) {
+					console.log("You have checked in! https://mumbai.polygonscan.com/tx/" + tx.hash);
+				}
+				else {
+					alert("Transaction failed! Please try again");
+				}
+
 			}
 		}
 		catch (error) {
@@ -284,6 +315,9 @@ const App = () => {
 					</button>
 					<button className='cta-button mint-button' disabled={null} onClick={callUserIntention}>
 						User Profile
+					</button>
+					<button className='cta-button mint-button' disabled={null} onClick={withdrawFunder}>
+						Withdraw Funds
 					</button>
 
 				</div>

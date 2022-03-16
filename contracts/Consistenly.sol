@@ -14,7 +14,7 @@ contract Consistently {
      
     uint8 minimumDays  = 21;
     uint8 maxiumDays = 255;
-    uint8 timeLapse = 86400; // Currently set at one day
+    uint timeLapse = 86400; // Currently set at one day
     struct Intention {
         uint8 noOfDays;
         uint8 defaulted; // Only 4 defaults are permitted
@@ -29,7 +29,7 @@ contract Consistently {
     Intention[] public intentions;
     constructor() {
         owner = msg.sender;
-        aavePool = IPool("0xe91E690407977F0b9fDc655504b895Fe4af0C371");
+        aavePool = IPool(0xe91E690407977F0b9fDc655504b895Fe4af0C371);
         // Set the baseURI of the Habit NFT
     }
 

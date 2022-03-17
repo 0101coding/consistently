@@ -10,7 +10,7 @@ import { networks } from './utils/networks';
 // Constants
 const TWITTER_HANDLE = 'home';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const CONTRACT_ADDRESS = '0xB5Ce8A134EC1f7725A72232Aac35E8236201Aae3';
+const CONTRACT_ADDRESS = '0x9B74dfdDAa2E70bCE44f549963c1DDf12fF0F850';
 
 const App = () => {
 	const [currentAccount, setCurrentAccount] = useState('');
@@ -135,10 +135,10 @@ const App = () => {
 			return;
 		}
 		//check the minimum days
-		if (days < 3) {
-			alert('Habit must be of atleast x days');
-			return;
-		}
+		// if (days < 1) {
+		// 	alert('Habit must be of atleast x days');
+		// 	return;
+		// }
 		console.log("Setting Habit", habit, "for this many days:", days);
 		try {
 			const { ethereum } = window;
@@ -202,6 +202,33 @@ const App = () => {
 	}
 
 	//call redeem function:
+	const Redeem = async () => {
+		try {
+			const { ethereum } = window;
+			if (ethereum) {
+
+				const provider = new ethers.providers.Web3Provider(ethereum);
+				const signer = provider.getSigner();
+				const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+
+				console.log("Going to pop wallet now to pay")
+				let tx = await contract.redeem();
+				// Wait for the transaction to be mined
+				const receipt = await tx.wait();
+
+				// Check if the transaction was successfully completed
+				if (receipt.status === 1) {
+					console.log("You have redeemed! https://mumbai.polygonscan.com/tx/" + tx.hash);
+				}
+				else {
+					alert("Transaction failed! Please try again");
+				}
+			}
+		}
+		catch (error) {
+			console.log(error);
+		}
+	}
 
 
 	//function to call getuserintention
@@ -387,7 +414,7 @@ const App = () => {
 					<button className='cta-button mint-button' disabled={null} onClick={callCheckIn}>
 						Check In
 					</button>
-					<button className='cta-button mint-button' disabled={null} >
+					<button className='cta-button mint-button' disabled={null} onClick={Redeem}>
 						Redeem
 					</button>
 				</div>

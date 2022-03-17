@@ -16,7 +16,8 @@ contract HabitNFT  is ERC721URIStorage, Ownable {
         
     }
 
-    function awardItem(address player)
+
+     function awardItem(address player, string memory tokenURI)
         public
         returns (uint256)
     {
@@ -24,15 +25,9 @@ contract HabitNFT  is ERC721URIStorage, Ownable {
 
         uint256 newItemId = _tokenIds.current();
         _mint(player, newItemId);
-        _setTokenURI(newItemId, string(abi.encodePacked(_baseURI(), "/", newItemId)));
+        //_setTokenURI(newItemId, string(abi.encodePacked(_baseURI(), "/", newItemId)));
+        _setTokenURI(newItemId, tokenURI);
         return newItemId;
     }
 
-    function setBaseURI(string memory baseURI_) external onlyOwner() {
-        _baseURIextended = baseURI_;
-    }
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseURIextended;
-    }
 }

@@ -11,10 +11,11 @@ contract Consistently {
     HabitNFT public habitNFT = new HabitNFT();
     mapping(address => bool) public userAddresses;
     address public owner;
+     string private tokenURI = "https://gateway.ipfs.io/ipfs/QmZzT9DAKAjYFgojsfHy252eLFhdp3Zr8f6d9Resui1X21";
      
-    uint8 minimumDays  = 3;
+    uint8 minimumDays  = 1; //change this later
     uint8 maxiumDays = 255;
-    uint timeLapse = 600; // Currently set at one day
+    uint timeLapse = 43200; // Currently set at 12 hours
     struct Intention {
         uint8 noOfDays;
         uint8 defaulted; // Only 4 defaults are permitted
@@ -179,7 +180,7 @@ contract Consistently {
         // Refund the User's Deposit from the Aave Pool
        // aavePool.withdraw(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, intention.weiBalance, msg.sender);
         // Mint a NFT to the User's Wallet
-        habitNFT.awardItem(msg.sender);
+        habitNFT.awardItem(msg.sender, tokenURI);
 
     }
 

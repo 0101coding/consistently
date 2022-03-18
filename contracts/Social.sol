@@ -12,10 +12,10 @@ contract Social {
 
     mapping(address => address[]) public friendsList;
 
-    modifier OnlyMembers {
-        require(isMember[msg.sender], "Not a member");
-        _;
-    }
+    // modifier OnlyMembers {
+    //     require(isMember[msg.sender], "Not a member");
+    //     _;
+    // }
 
     modifier NotSelf(address addr) {
         require(!(addr == msg.sender), "Can't friend yourself");
@@ -33,13 +33,13 @@ contract Social {
     }
 
     //Register membership.
-    function register() public {
-        require(!isMember[msg.sender], "You're already a member");
-        isMember[msg.sender] = true;
-    }
+    // function register() public {
+    //     require(!isMember[msg.sender], "You're already a member");
+    //     isMember[msg.sender] = true;
+    // }
 
     //Register/Remove one or multiple friends.
-    function registerFriend(address addr) public OnlyMembers NotSelf(addr) {
+    function registerFriend(address addr) public NotSelf(addr) {
         if(areFriends[addr][msg.sender] == Friend.No) {
         areFriends[msg.sender][addr] = Friend.Pending;
         } else {
@@ -50,13 +50,13 @@ contract Social {
     }
 
     function registerFriends(address[] calldata addrs) public {
-        register();
+        // register();
         for(uint i = 0; i < addrs.length; i++) {
             registerFriend(addrs[i]);
         }
     }
 
-    function removeFriend(address addr) public OnlyMembers {
+    function removeFriend(address addr) public {
         areFriends[msg.sender][addr] = Friend.No;
         areFriends[addr][msg.sender] = Friend.No;
         removeFromFriendList(addr);

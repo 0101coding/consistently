@@ -4,11 +4,15 @@ pragma solidity ^0.8.0;
 import "./Habit.sol";
 import "./HabitNFT.sol";
 import "./aave/IPool.sol";
+import "./Social.sol";
+
 contract Consistently {
     IPool public aavePool;
 
     Habit public habit = new Habit();
     HabitNFT public habitNFT = new HabitNFT();
+    Social public social = new Social();
+
     mapping(address => bool) public userAddresses;
     address public owner;
      string private tokenURI = "https://gateway.ipfs.io/ipfs/QmZzT9DAKAjYFgojsfHy252eLFhdp3Zr8f6d9Resui1X21";
@@ -58,6 +62,7 @@ contract Consistently {
         intentions.push(intent);
         // Add to list of Addresses. if not already there
         userAddresses[msg.sender] = true;
+        social.register();
 
         uint256 intentionId = intentions.length; // NOTE TO ACCESS YOU NEED TO SUBTRACT 1 FROM INDEX
 

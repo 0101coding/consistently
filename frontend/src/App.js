@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import './styles/App.css';
 import twitterLogo from './assets/twitter-logo.svg';
 import { ethers } from "ethers";
-import contractAbi from './assets/contractABI.json';
+import contractAbi from './assets/newContractABI.json';
+import socialContractAbi from './assets/socialContractABI.json';
 import polygonLogo from './assets/polygonlogo.png';
 import ethLogo from './assets/ethlogo.png';
 import { networks } from './utils/networks';
@@ -10,7 +11,8 @@ import { networks } from './utils/networks';
 // Constants
 const TWITTER_HANDLE = 'home';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const CONTRACT_ADDRESS = '0x9B74dfdDAa2E70bCE44f549963c1DDf12fF0F850';
+const CONTRACT_ADDRESS = '0x0d81Df222BB44b883265538586829715CF157163';
+const SOCIAL_CONTRACT_ADDRESS = '0x6DA1b53a7B1E05FD9042bF33A88F3c03177A7663';
 
 const App = () => {
 	const [currentAccount, setCurrentAccount] = useState('');
@@ -25,6 +27,16 @@ const App = () => {
 	const [weiBalance, setweiBalance] = useState(0);
 	const [habit1, setHabit1] = useState('');
 	const [checking, setChecking] = useState(false);
+
+	//Social
+	const [friend, setFriend] = useState('');
+	let intention2;
+	const [numberOfDays2, setNumberOfDays2] = useState(0);
+	const [numberOfDefaults2, setnumberOfDefaults2] = useState(0);
+	const [weiDeposited2, setweiDeposited2] = useState(0);
+	const [weiBalance2, setweiBalance2] = useState(0);
+	const [habit2, setHabit2] = useState('');
+	const [checking2, setChecking2] = useState(false);
 
 	//connectwallet method:
 	const connectWallet = async () => {
@@ -148,7 +160,7 @@ const App = () => {
 				const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
 
 				console.log("Going to pop wallet now to pay")
-				let tx = await contract.register(habit, days, { value: ethers.utils.parseEther("0.1") });
+				let tx = await contract.register(habit, days, { value: ethers.utils.parseEther("0.001") });
 				// Wait for the transaction to be mined
 				const receipt = await tx.wait();
 
@@ -240,6 +252,8 @@ const App = () => {
 				const provider = new ethers.providers.Web3Provider(ethereum);
 				const signer = provider.getSigner();
 				const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+				const socialContract = new ethers.Contract(SOCIAL_CONTRACT_ADDRESS, socialContractAbi.abi, signer);
+
 				let check = await contract.userAddresses(currentAccount);
 				console.log("BOOL:", check);
 				setChecking(check);
@@ -256,6 +270,64 @@ const App = () => {
 				setHabit1(intention[5]);
 				console.log(intention)
 				// Wait for the transaction to be mined
+				
+				let hasFriends = await socialContract.returnFriends();
+				console.log("friendsList length is " + hasFriends.length);
+				if(hasFriends.length > 0) {
+					callFriendsIntention();
+				}
+			}
+		}
+		catch (error) {
+			console.log(error);
+		}
+	}
+
+	const callFriendsIntention = async () => {
+		try {
+			const { ethereum } = window;
+			if (ethereum) {
+
+				const provider = new ethers.providers.Web3Provider(ethereum);
+				const signer = provider.getSigner();
+				const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi.abi, signer);
+				const socialContract = new ethers.Contract(SOCIAL_CONTRACT_ADDRESS, socialContractAbi.abi, signer);
+
+				let check2 = await contract.userAddresses(currentAccount);
+				console.log("BOOL2:", check2);
+				setChecking2(check2);
+
+				// let habitAddress = await contract.habit();
+				// console.log("Token address:",habitAddress);
+
+				// console.log("The users intentions:")
+				let friendsAddr = await socialContract.returnFriends();
+				console.log("Your friend's address is " + friendsAddr[0]);
+				intention = await contract.getSpecificUserIntention(friendsAddr[0]);
+				setNumberOfDays2(intention[0]);
+				setnumberOfDefaults2(intention[1]);
+				setweiDeposited2(ethers.utils.formatUnits(intention[3].toString()));
+				setweiBalance2(ethers.utils.formatUnits(intention[4].toString()));
+				setHabit2(intention[5]);
+				console.log(intention)
+				// Wait for the transaction to be mined
+			}
+		}
+		catch (error) {
+			console.log(error);
+		}
+	}
+
+	const registerFriend = async () => {
+		try {
+			const { ethereum } = window;
+			if (ethereum) {
+
+				const provider = new ethers.providers.Web3Provider(ethereum);
+				const signer = provider.getSigner();
+				const socialContract = new ethers.Contract(SOCIAL_CONTRACT_ADDRESS, socialContractAbi.abi, signer);
+				// await socialContract.register();
+				await socialContract.registerFriend(ethers.utils.getAddress(friend));
 			}
 		}
 		catch (error) {
@@ -333,6 +405,13 @@ const App = () => {
 					onChange={e => setDays(e.target.value)}
 				/>
 
+				<input
+					type="text"
+					value={friend}
+					placeholder='Add a friend'
+					onChange={e => setFriend(e.target.value)}
+				/>
+
 				<div className="button-container">
 					{/* <button className='cta-button mint-button' disabled={null} onClick={null}>
 						Mint
@@ -342,6 +421,9 @@ const App = () => {
 					</button>
 					<button className='cta-button mint-button' disabled={null} onClick={callUserIntention}>
 						User Profile
+					</button>
+					<button className='cta-button mint-button' disabled={null} onClick={registerFriend}>
+						Add a friend
 					</button>
 					<button className='cta-button mint-button' disabled={null} onClick={withdrawFunder}>
 						Withdraw Funds
@@ -375,7 +457,7 @@ const App = () => {
 
 					<div className="profile-heading">
 						<h1>
-							Habit:{habit1}
+							Your habit: {habit1}
 						</h1>
 					</div>
 
@@ -423,6 +505,51 @@ const App = () => {
 		)
 	}
 
+		//function to render profile of user's friend
+		const profile2 = () => {
+			callFriendsIntention();
+			console.log(intention2);
+			return (
+				<div>
+	
+					<div className="Profile">
+	
+						<div className="profile-heading">
+							<h1>
+								Your friend's habit: {habit2}
+							</h1>
+						</div>
+	
+						<div className="profile">
+	
+							<div className="profile-item">
+								<h1>{numberOfDays2}</h1>
+								<h2>Number of Days</h2>
+							</div>
+	
+							<div className="profile-item">
+								<h1>{numberOfDefaults2}</h1>
+								<h2>Misses</h2>
+							</div>
+	
+							<div className="profile-item">
+								<h1>{weiDeposited2}</h1>
+								<h2>Money deposited</h2>
+							</div>
+	
+							<div className="profile-item">
+								<h1>{weiBalance2}</h1>
+								<h2>Current Balance</h2>
+							</div>
+	
+						</div>
+	
+					</div>
+	
+				</div>
+			)
+		}
+
 
 	// This runs our function when the page loads.
 	useEffect(() => {
@@ -454,6 +581,7 @@ const App = () => {
 				{!checking && currentAccount && renderInputForm()}
 				{/*flag && checkInPage()*/}
 				{checking && profile()}
+				{checking2 && profile2()}
 
 				{/* Hide the connect button if currentAccount isn't empty
 				{!currentAccount && renderNotConnectedContainer()} */}

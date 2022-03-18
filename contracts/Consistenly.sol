@@ -51,7 +51,7 @@ contract Consistently {
 
     
     function register(string memory _habit, uint8 _days) external payable {
-        require(msg.value >= .01 ether, "Minimum Amount of .1 Eth Required");
+        require(msg.value >= .001 ether, "Minimum Amount of .1 Eth Required");
         require(_days >= minimumDays, "Minimum of 21 days Acceptable");
         require(_days <= maxiumDays, "Maximum of 255 days Acceptable");
         require(userIntentions[msg.sender]==0, "You can only have one habit tracked at a time");
@@ -62,7 +62,6 @@ contract Consistently {
         intentions.push(intent);
         // Add to list of Addresses. if not already there
         userAddresses[msg.sender] = true;
-        social.register();
 
         uint256 intentionId = intentions.length; // NOTE TO ACCESS YOU NEED TO SUBTRACT 1 FROM INDEX
 
@@ -197,9 +196,16 @@ contract Consistently {
          uint intentionId = userIntentions[msg.sender] - 1;
         Intention memory intention = intentions[intentionId];
         return intention;
-
     }
 
+    function getSpecificUserIntention(address addr) external view
+        onlyRegisteredUsers(addr)
+        onlyActiveUsers(addr)
+     returns (Intention memory) {
+         uint intentionId = userIntentions[addr] - 1;
+        Intention memory intention = intentions[intentionId];
+        return intention;
+    }
 
 
     modifier onlyRegisteredUsers(address _userAddress) {

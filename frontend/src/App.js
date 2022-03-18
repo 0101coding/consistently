@@ -37,7 +37,7 @@ const App = () => {
 	const [weiBalance2, setweiBalance2] = useState(0);
 	const [habit2, setHabit2] = useState('');
 	const [checking2, setChecking2] = useState(false);
-	//test
+	//tests
 	//connectwallet method:
 	const connectWallet = async () => {
 		try {

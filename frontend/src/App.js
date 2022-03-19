@@ -11,7 +11,7 @@ import { networks } from './utils/networks';
 // Constants
 const TWITTER_HANDLE = 'home';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const CONTRACT_ADDRESS = '0x0d81Df222BB44b883265538586829715CF157163';
+const CONTRACT_ADDRESS = '0x72F376376B78DDa1188C5Bdcda01085a683fe8c5';
 const SOCIAL_CONTRACT_ADDRESS = '0x6DA1b53a7B1E05FD9042bF33A88F3c03177A7663';
 
 const App = () => {

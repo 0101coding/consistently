@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0; 
 
 import "./Habit.sol";
-import "./HabitNFT.sol";
+import "./NewHabitNFT.sol";
 import "./aave/IPool.sol";
 import "./Social.sol";
 
@@ -10,16 +10,16 @@ contract Consistently {
     IPool public aavePool;
 
     Habit public habit = new Habit();
-    HabitNFT public habitNFT = new HabitNFT();
+    NewHabitNFT public habitNFT = new NewHabitNFT();
     Social public social = new Social();
 
     mapping(address => bool) public userAddresses;
     address public owner;
-     string private tokenURI = "https://gateway.ipfs.io/ipfs/QmZzT9DAKAjYFgojsfHy252eLFhdp3Zr8f6d9Resui1X21";
+    // string private tokenURI = "https://gateway.ipfs.io/ipfs/QmZzT9DAKAjYFgojsfHy252eLFhdp3Zr8f6d9Resui1X21";
      
     uint8 minimumDays  = 1; //change this later
     uint8 maxiumDays = 255;
-    uint timeLapse = 43200; // Currently set at 12 hours
+    uint timeLapse = 60; // Currently set at 1 min
     struct Intention {
         uint8 noOfDays;
         uint8 defaulted; // Only 4 defaults are permitted
@@ -184,7 +184,11 @@ contract Consistently {
         // Refund the User's Deposit from the Aave Pool
        // aavePool.withdraw(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, intention.weiBalance, msg.sender);
         // Mint a NFT to the User's Wallet
-        habitNFT.awardItem(msg.sender, tokenURI);
+        // (bool success, ) = address(habitNFT).delegatecall(
+        //     abi.encodeWithSignature("mint(uint256,uint256)", 0, 1)
+        // );
+        // require(success);
+        habitNFT.mint(msg.sender, 0, 1);
 
     }
 

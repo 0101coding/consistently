@@ -276,7 +276,6 @@ const App = () => {
 				setweiDeposited(ethers.utils.formatUnits(intention[3].toString()));
 				setweiBalance(ethers.utils.formatUnits(intention[4].toString()));
 				setHabit1(intention[5]);
-				console.log(intention)
 				// Wait for the transaction to be mined
 				
 				let hasFriends = await socialContract.returnFriends();
@@ -312,16 +311,15 @@ const App = () => {
 				// console.log("The users intentions:")
 				let friendsAddr = await socialContract.returnFriends();
 
-				let _streak2 = await contract.checkInCount(friendsAddr);
+				let _streak2 = await contract.checkInCount(friendsAddr[0]);
 				setStreak2(_streak2);
 				console.log("Your friend's address is " + friendsAddr[0]);
-				intention = await contract.getSpecificUserIntention(friendsAddr[0]);
-				setNumberOfDays2(intention[0]);
-				setnumberOfDefaults2(intention[1]);
-				setweiDeposited2(ethers.utils.formatUnits(intention[3].toString()));
-				setweiBalance2(ethers.utils.formatUnits(intention[4].toString()));
-				setHabit2(intention[5]);
-				console.log(intention)
+				intention2 = await contract.getSpecificUserIntention(friendsAddr[0]);
+				setNumberOfDays2(intention2[0]);
+				setnumberOfDefaults2(intention2[1]);
+				setweiDeposited2(ethers.utils.formatUnits(intention2[3].toString()));
+				setweiBalance2(ethers.utils.formatUnits(intention2[4].toString()));
+				setHabit2(intention2[5]);
 				// Wait for the transaction to be mined
 			}
 		}

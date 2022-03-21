@@ -409,7 +409,7 @@ const App = () => {
 						<input
 							type="text"
 							value={habit}
-							placeholder='What do you wanna do?'
+							placeholder='What habit do u wanna build?'
 							onChange={e => setHabit(e.target.value)}
 						/>
 						{/* <p className='tld'> {tld} </p> */}
@@ -459,7 +459,7 @@ const App = () => {
 						<input
 							type="text"
 							value={habit}
-							placeholder='What do you wanna do?'
+							placeholder='What habit do u wanna build?'
 							onChange={e => setHabit(e.target.value)}
 						/>
 						{/* <p className='tld'> {tld} </p> */}

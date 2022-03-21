@@ -17,6 +17,7 @@ const TWITTER_LINK2 = `https://twitter.com/${TWITTER_HANDLE2}`;
 const TWITTER_LINK3 = `https://twitter.com/${TWITTER_HANDLE3}`;
 const CONTRACT_ADDRESS = '0x72F376376B78DDa1188C5Bdcda01085a683fe8c5';
 const SOCIAL_CONTRACT_ADDRESS = '0x6DA1b53a7B1E05FD9042bF33A88F3c03177A7663';
+const owner = `0x637C1Ec1d205a4E7a79c9CE4Bd100CD1d19E6080`;
 
 const App = () => {
 	const [currentAccount, setCurrentAccount] = useState('');
@@ -43,7 +44,7 @@ const App = () => {
 	const [habit2, setHabit2] = useState('');
 	const [checking2, setChecking2] = useState(false);
 	const [streak2, setStreak2] = useState(0);
-	//tests
+	
 	//connectwallet method:
 	const connectWallet = async () => {
 		try {
@@ -387,6 +388,8 @@ const App = () => {
 	// Form to enter domain name and data
 	const renderInputForm = () => {
 		// If not on Polygon Mumbai Testnet, render "Please connect to Polygon Mumbai Testnet"
+		console.log("current acct:",currentAccount);
+		console.log('owner:',owner);
 		if (network !== 'Polygon Mumbai Testnet') {
 			return (
 				<div className="connect-wallet-container">
@@ -396,53 +399,104 @@ const App = () => {
 				</div>
 			);
 		}
-		return (
-			<div className="form-container">
-				<div className="first-row">
+
+		//testing
+
+			if (currentAccount.toLowerCase() == owner.toLowerCase()){
+			return (
+				<div className="form-container">
+					<div className="first-row">
+						<input
+							type="text"
+							value={habit}
+							placeholder='What do you wanna do?'
+							onChange={e => setHabit(e.target.value)}
+						/>
+						{/* <p className='tld'> {tld} </p> */}
+					</div>
+
 					<input
 						type="text"
-						value={habit}
-						placeholder='What do you wanna do?'
-						onChange={e => setHabit(e.target.value)}
+						value={days}
+						placeholder='Number of Days'
+						onChange={e => setDays(e.target.value)}
 					/>
-					{/* <p className='tld'> {tld} </p> */}
-				</div>
 
-				<input
-					type="text"
-					value={days}
-					placeholder='Number of Days'
-					onChange={e => setDays(e.target.value)}
-				/>
+					<input
+						type="text"
+						value={friend}
+						placeholder='Add a friend'
+						onChange={e => setFriend(e.target.value)}
+					/>
 
-				<input
-					type="text"
-					value={friend}
-					placeholder='Add a friend'
-					onChange={e => setFriend(e.target.value)}
-				/>
+					<div className="button-container">
+						{/* <button className='cta-button mint-button' disabled={null} onClick={null}>
+							Mint
+						</button>   */}
+						<button className='cta-button mint-button' disabled={null} onClick={registerHabit}>
+							Create habit
+						</button>
+						<button className='cta-button mint-button' disabled={null} onClick={callUserIntention}>
+							User Profile
+						</button>
+						<button className='cta-button mint-button' disabled={null} onClick={registerFriend}>
+							Add a friend
+						</button>
 
-				<div className="button-container">
-					{/* <button className='cta-button mint-button' disabled={null} onClick={null}>
-						Mint
-					</button>   */}
-					<button className='cta-button mint-button' disabled={null} onClick={registerHabit}>
-						Create habit
-					</button>
-					<button className='cta-button mint-button' disabled={null} onClick={callUserIntention}>
-						User Profile
-					</button>
-					<button className='cta-button mint-button' disabled={null} onClick={registerFriend}>
-						Add a friend
-					</button>
-					<button className='cta-button mint-button' disabled={null} onClick={withdrawFunder}>
-						Withdraw Funds
-					</button>
+						<button className='cta-button mint-button' disabled={null} onClick={withdrawFunder}>
+							Withdraw Funds
+						</button>
+
+					</div>
 
 				</div>
+			);}
 
-			</div>
-		);
+			else{
+			return(
+				<div className="form-container">
+					<div className="first-row">
+						<input
+							type="text"
+							value={habit}
+							placeholder='What do you wanna do?'
+							onChange={e => setHabit(e.target.value)}
+						/>
+						{/* <p className='tld'> {tld} </p> */}
+					</div>
+
+					<input
+						type="text"
+						value={days}
+						placeholder='Number of Days'
+						onChange={e => setDays(e.target.value)}
+					/>
+
+					<input
+						type="text"
+						value={friend}
+						placeholder='Add a friend'
+						onChange={e => setFriend(e.target.value)}
+					/>
+
+					<div className="button-container">
+						{/* <button className='cta-button mint-button' disabled={null} onClick={null}>
+							Mint
+						</button>   */}
+						<button className='cta-button mint-button' disabled={null} onClick={registerHabit}>
+							Create habit
+						</button>
+						<button className='cta-button mint-button' disabled={null} onClick={callUserIntention}>
+							User Profile
+						</button>
+						<button className='cta-button mint-button' disabled={null} onClick={registerFriend}>
+							Add a friend
+						</button>
+
+					</div>
+
+				</div>
+			);}
 	}
 
 	//function to render the check in 

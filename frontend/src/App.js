@@ -44,6 +44,9 @@ const App = () => {
 	const [habit2, setHabit2] = useState('');
 	const [checking2, setChecking2] = useState(false);
 	const [streak2, setStreak2] = useState(0);
+
+	//stores a friends address from address array
+	const [friendAddress, setFriendsAddress] = useState('');
 	
 	//connectwallet method:
 	const connectWallet = async () => {
@@ -316,6 +319,7 @@ const App = () => {
 				setStreak2(_streak2);
 				console.log("Your friend's address is " + friendsAddr[0]);
 				intention2 = await contract.getSpecificUserIntention(friendsAddr[0]);
+				setFriendsAddress(friendsAddr[0]);
 				setNumberOfDays2(intention2[0]);
 				setnumberOfDefaults2(intention2[1]);
 				setweiDeposited2(ethers.utils.formatUnits(intention2[3].toString()));
@@ -521,7 +525,7 @@ const App = () => {
 
 					<div className="profile-heading">
 						<h1>
-							Your habit: {habit1} Day {streak}
+							Your habit: {habit1} <br/>Day: {streak}
 						</h1>
 					</div>
 
@@ -573,14 +577,16 @@ const App = () => {
 		const profile2 = () => {
 			callFriendsIntention();
 			console.log(intention2);
+			// let friend1 = friendsAddr[0];
 			return (
 				<div>
+					<h1>Friends:</h1>
 	
 					<div className="Profile">
 	
 						<div className="profile-heading">
 							<h1>
-								Your friend's habit: {habit2} Day {streak2}
+							{friendAddress.slice(0, 6)}...{friendAddress.slice(-4)}'s habit: {habit2} <br /> Day: {streak2}
 							</h1>
 						</div>
 	
